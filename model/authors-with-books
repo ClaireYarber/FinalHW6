@@ -1,0 +1,100 @@
+<?php
+function selectAuthors() {
+    try {
+        $conn = get_db_connection();
+        $stmt = $conn->prepare("SELECT author_id, author_name, publisher FROM `author`");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $conn->close();
+        return $result;
+    } catch (Exception $e) {
+        $conn->close();
+        throw $e;
+    }
+}
+
+function selectBooksByAuthor($iid) {
+    try {
+        $conn = get_db_connection();
+        $stmt = $conn->prepare("SELECT c.book_id, book_number, book_description, year, month, day, page_id, s.author_id FROM `book` c join section s on s.book_id = c.book_id where s.author_id=?");
+        $stmt->bind_param("i", $iid);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $conn->close();
+        return $result;
+    } catch (Exception $e) {
+        $conn->close();
+        throw $e;
+    }
+}
+
+function selectAuthorsForInput() {
+    try {
+        $conn = get_db_connection();
+        $stmt = $conn->prepare("SELECT author_id, author_name FROM `author` order by author_name");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $conn->close();
+        return $result;
+    } catch (Exception $e) {
+        $conn->close();
+        throw $e;
+    }
+}
+
+function selectBooksForInput() {
+    try {
+        $conn = get_db_connection();
+        $stmt = $conn->prepare("SELECT book_id, book_number FROM `book` order by book_number");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $conn->close();
+        return $result;
+    } catch (Exception $e) {
+        $conn->close();
+        throw $e;
+    }
+}
+
+function insertSection($iid, $cid, $year, $month, $day) {
+    try {
+        $conn = get_db_connection();
+        $stmt = $conn->prepare("INSERT INTO `page` (`author_id`, `book_id`, `year`, `month`, `day`) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("iisss", $iid, $cid, $year, $month, $day);
+        $success = $stmt->execute();
+        $conn->close();
+        return $success;
+    } catch (Exception $e) {
+        $conn->close();
+        throw $e;
+    }
+}
+
+function updateSection($iid, $cid, $year, $month, $day, $sid) {
+    try {
+        $conn = get_db_connection();
+        $stmt = $conn->prepare("update `page` set `author_id` = ?, `book_id` = ?, `year` = ?, `month` = ?, `day` = ? where page_id = ?");
+        $stmt->bind_param("iisssi", $iid, $cid, $year, $month, $day, $sid);
+        $success = $stmt->execute();
+        $conn->close();
+        return $success;
+    } catch (Exception $e) {
+        $conn->close();
+        throw $e;
+    }
+}
+
+function deletePage($sid) {
+    try {
+        $conn = get_db_connection();
+        $stmt = $conn->prepare("delete from page where page_id=?");
+        $stmt->bind_param("i", $sid);
+        $success = $stmt->execute();
+        $conn->close();
+        return $success;
+    } catch (Exception $e) {
+        $conn->close();
+        throw $e;
+    }
+}
+?>
